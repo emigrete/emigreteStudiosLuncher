@@ -118,7 +118,7 @@ export default function Menu({ onOpenModal, auth }: MenuProps): JSX.Element {
           <span className="footer__text">
             <strong>MODPACK BY TEAM MAFIA</strong>
             <span className="footer__sub">
-              por Emigrete Studios · <span className="footer__ver">v0.1.0</span>
+              por Emigrete Studios · <span className="footer__ver">v{window.api?.version ?? '0.1.1'}</span>
             </span>
           </span>
         </div>
