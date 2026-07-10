@@ -180,8 +180,8 @@ cancelación en cascada, y el progreso a la UI va throttleado (~8/s).
 JUGAR ejecuta, en orden, emitiendo un progreso unificado:
 
 1. **Sincroniza** el modpack (M2).
-2. **Detecta Java 21** (necesario para 1.21.1). Busca en `PACK_JAVA_PATH`, `JAVA_HOME`, el PATH y
-   ubicaciones típicas por SO. Si no hay, avisa con un mensaje claro.
+2. **Resuelve Java 21** (necesario para 1.21.1). Busca en `PACK_JAVA_PATH`, `JAVA_HOME`, el PATH y
+   ubicaciones típicas por SO. **Si no hay Java del sistema, baja un JRE gestionado** (una sola vez).
 3. **Instala NeoForge** la primera vez: baja el instalador oficial de `maven.neoforged.net`
    (verificado por sha1), corre `java -jar …-installer.jar --install-client <instancia>` y deja
    `versions/neoforge-21.1.235/`. Idempotente: no reinstala si ya está.
@@ -197,8 +197,15 @@ JUGAR ejecuta, en orden, emitiendo un progreso unificado:
 La versión de NeoForge sale del `loader.version` del manifiesto; si ponés `latest` o un
 placeholder, se resuelve la última `21.1.x` desde el maven-metadata (nunca una de otro Minecraft).
 
-> **Java:** MCLC no descarga Java. Por ahora hay que tenerlo (o `PACK_JAVA_PATH`). Descargar el
-> JRE automáticamente queda para más adelante.
+> **Java (M4a):** MCLC no descarga Java, así que el launcher lo resuelve solo. Si hay un Java del
+> sistema `>=` el major requerido (`PACK_JAVA_PATH` / `JAVA_HOME` / PATH / rutas típicas), lo usa.
+> Si no, **descarga automáticamente un JRE** con parity Mojang (`@xmcl/installer`, el mismo JRE que
+> el launcher oficial) a `userData/runtime/<componente>` y valida que corra antes de lanzar. El
+> major sale de `java.major` del manifiesto (default 21). Se baja una sola vez y queda cacheado.
+>
+> Nota de dependencia: `@xmcl/installer@6.1.2` trae una `undici` v7 incompatible con su propio
+> `throwOnError`; se fija a `undici@6.21.3` vía `overrides`. Además, en modo raw no setea el bit
+> `+x`, así que el launcher aplica `chmod` según los flags `executable` del manifest (Linux/mac).
 
 ## Seguridad
 
