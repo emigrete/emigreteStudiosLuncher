@@ -68,3 +68,13 @@ test('javaCandidates usa java.exe en Windows y rutas típicas por SO', () => {
 test('MIN_JAVA es 21 (NeoForge 1.21.1)', () => {
   assert.equal(MIN_JAVA, 21)
 })
+
+test('detectJava respeta un requiredMajor explícito (17 acepta 17)', async () => {
+  const run = async (): Promise<{ ok: boolean; output: string }> => ({ ok: true, output: 'openjdk version "17.0.9"' })
+  assert.deepEqual(await detectJava(['x'], run, 17), { path: 'x', major: 17 })
+})
+
+test('detectJava con requiredMajor 25 rechaza un Java 21', async () => {
+  const run = async (): Promise<{ ok: boolean; output: string }> => ({ ok: true, output: 'openjdk version "21.0.2"' })
+  assert.equal(await detectJava(['x'], run, 25), null)
+})

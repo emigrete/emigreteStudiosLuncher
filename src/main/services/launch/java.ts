@@ -41,8 +41,12 @@ export const execJavaVersion: JavaRunner = (path) =>
     })
   })
 
-/** Devuelve el primer candidato que sea Java >= MIN_JAVA, o null. */
-export async function detectJava(candidates: readonly string[], run: JavaRunner = execJavaVersion): Promise<JavaInfo | null> {
+/** Devuelve el primer candidato que sea Java >= requiredMajor, o null. */
+export async function detectJava(
+  candidates: readonly string[],
+  run: JavaRunner = execJavaVersion,
+  requiredMajor: number = MIN_JAVA
+): Promise<JavaInfo | null> {
   const tried = new Set<string>()
   for (const path of candidates) {
     if (!path || tried.has(path)) continue
@@ -50,7 +54,7 @@ export async function detectJava(candidates: readonly string[], run: JavaRunner 
     const { ok, output } = await run(path)
     if (!ok) continue
     const major = parseJavaMajor(output)
-    if (major !== null && major >= MIN_JAVA) return { path, major }
+    if (major !== null && major >= requiredMajor) return { path, major }
   }
   return null
 }
