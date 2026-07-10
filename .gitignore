@@ -7,5 +7,6 @@ dist/
 src/renderer/src/assets/stone.png
 
 *.log
+*.tsbuildinfo
 .DS_Store
 .env
