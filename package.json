@@ -22,6 +22,14 @@
     "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./test/helpers/register.mjs --test \"test/**/*.test.ts\"",
     "pack:manifest": "node scripts/make-manifest.mjs"
   },
+  "overrides": {
+    "@xmcl/installer": {
+      "undici": "6.21.3"
+    },
+    "@xmcl/file-transfer": {
+      "undici": "6.21.3"
+    }
+  },
   "devDependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",

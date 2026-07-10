@@ -1,6 +1,6 @@
-import { access } from 'node:fs/promises'
+import { access, chmod } from 'node:fs/promises'
 import { fetchJavaRuntimeManifest, installJavaRuntimeTask } from '@xmcl/installer'
-import type { InstallJavaDeps } from './java-runtime'
+import { executablePaths, type InstallJavaDeps } from './java-runtime'
 import { execJavaVersion, parseJavaMajor } from './java'
 
 /**
@@ -52,6 +52,12 @@ export const realInstallJavaDeps: InstallJavaDeps = {
       })
     } finally {
       signal.removeEventListener('abort', onAbort)
+    }
+
+    // @xmcl (modo raw) no setea el bit +x; lo aplicamos según el manifest (no-op en Windows).
+    if (process.platform !== 'win32') {
+      const paths = executablePaths(manifest.files, destination)
+      await Promise.all(paths.map((p) => chmod(p, 0o755).catch(() => undefined)))
     }
   }
 }

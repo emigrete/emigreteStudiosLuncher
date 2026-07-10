@@ -23,6 +23,22 @@ export function javaBinPath(runtimeDir: string, platform: NodeJS.Platform): stri
   return join(runtimeDir, 'bin', exe)
 }
 
+/** Entrada del manifest de Mojang (lo mínimo que nos interesa). */
+export interface ManifestEntry {
+  type: string
+  executable?: boolean
+}
+
+/**
+ * Rutas absolutas que el manifest marca como ejecutables. @xmcl (modo raw) baja los
+ * archivos sin el bit +x, así que hay que setearlo nosotros post-instalación.
+ */
+export function executablePaths(files: Record<string, ManifestEntry>, destination: string): string[] {
+  return Object.entries(files)
+    .filter(([, entry]) => entry.type === 'file' && entry.executable === true)
+    .map(([rel]) => join(destination, rel))
+}
+
 export interface InstallJavaDeps {
   /** ¿Existe ya el ejecutable? */
   exists: (path: string) => Promise<boolean>

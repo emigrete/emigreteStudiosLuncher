@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import {
   componentForMajor,
   javaBinPath,
+  executablePaths,
   ensureManagedJava,
   type InstallJavaDeps
 } from '../src/main/services/launch/java-runtime.ts'
@@ -17,6 +18,17 @@ test('componentForMajor mapea 21/17/8 y falla en lo desconocido', () => {
 test('javaBinPath usa java.exe en Windows y java en el resto', () => {
   assert.equal(javaBinPath('/r/delta', 'win32'), '/r/delta/bin/java.exe')
   assert.equal(javaBinPath('/r/delta', 'linux'), '/r/delta/bin/java')
+})
+
+test('executablePaths devuelve solo los files marcados executable, con ruta absoluta', () => {
+  const files = {
+    'bin/java': { type: 'file', executable: true },
+    'lib/jspawnhelper': { type: 'file', executable: true },
+    'lib/rt.jar': { type: 'file', executable: false },
+    'legal/README': { type: 'file' },
+    bin: { type: 'directory' }
+  }
+  assert.deepEqual(executablePaths(files, '/dest'), ['/dest/bin/java', '/dest/lib/jspawnhelper'])
 })
 
 function depsWith(overrides: Partial<InstallJavaDeps>): InstallJavaDeps {
