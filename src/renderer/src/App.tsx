@@ -1,6 +1,7 @@
 import { useEffect, useState, type JSX } from 'react'
 import HeroBackground from './components/HeroBackground'
 import TitleBar from './components/TitleBar'
+import UpdaterPill from './components/UpdaterPill'
 import Menu from './components/Menu'
 import Splash from './components/Splash'
 import Modal, { type ModalState } from './components/Modal'
@@ -23,6 +24,7 @@ export default function App(): JSX.Element {
     <>
       <HeroBackground />
       <TitleBar />
+      <UpdaterPill />
       <Menu onOpenModal={setModal} auth={auth} />
       <Modal state={modal} onClose={() => setModal(null)} />
       <Splash gone={booted} />

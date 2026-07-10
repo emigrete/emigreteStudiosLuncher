@@ -872,3 +872,72 @@
   transition: width 120ms linear;
 }
 .settings__result-text { letter-spacing: 0.04em; }
+
+/* ------------------------------ Updater pill ------------------------------ *
+ * Aviso de actualización (chrome del launcher -> paleta Emigrete cyan).
+ * Estética HUD pixel: borde duro, bevel inset, Monocraft. Debajo del titlebar.
+ * -------------------------------------------------------------------------- */
+.updater {
+  position: fixed;
+  top: 46px;
+  right: 16px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 340px;
+  padding: 8px 11px;
+  font-family: var(--font-ui);
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+  color: var(--emigrete-blanco);
+  background: linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
+  border: 3px solid #0b0710;
+  border-radius: 2px;
+  box-shadow:
+    inset 2px 2px 0 rgba(63, 224, 224, 0.22),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.55),
+    0 8px 22px rgba(0, 0, 0, 0.5);
+  animation: updater-in var(--dur) var(--ease);
+}
+@keyframes updater-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.updater__label {
+  line-height: 1.5;
+  color: var(--emigrete-cyan);
+}
+.updater--error .updater__label { color: var(--naranja-luz); }
+.updater__btn {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  font-family: var(--font-ui);
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+  color: var(--fondo);
+  background: linear-gradient(180deg, #6bf0f0, var(--emigrete-cyan));
+  border: 2px solid #0b0710;
+  border-radius: 2px;
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.4), inset -2px -2px 0 rgba(0, 60, 60, 0.45);
+  cursor: pointer;
+  transition: filter var(--dur-fast);
+}
+.updater__btn:hover { filter: brightness(1.12); }
+.updater__btn:active { filter: brightness(0.92); }
+.updater__btn:focus-visible { outline: 2px solid var(--emigrete-blanco); outline-offset: 2px; }
+.updater__bar {
+  width: 130px;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 2px solid #0b0710;
+  border-radius: 2px;
+  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+.updater__bar-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(180deg, #6bf0f0, var(--emigrete-cyan));
+  transition: width 120ms linear;
+}
