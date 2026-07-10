@@ -1,43 +1,74 @@
 import { app, safeStorage } from 'electron'
 import { join } from 'path'
 import { readFile, writeFile, rm } from 'fs/promises'
+import { randomBytes } from 'node:crypto'
+import {
+  TAG_SAFE_STORAGE,
+  TAG_LOCAL_AES,
+  LOCAL_KEY_BYTES,
+  localEncrypt,
+  localDecrypt,
+  frame,
+  unframe
+} from './session-crypto'
 
 /**
  * Persistencia del refresh token de Microsoft.
  *
- * Se cifra con `safeStorage` (keychain del SO). Si el SO no ofrece cifrado
- * (p. ej. Linux sin keyring), NO se persiste nada: preferimos pedir login de
- * nuevo antes que dejar un token de larga vida en texto plano.
+ * Preferimos `safeStorage` del SO (encriptación real: DPAPI/keychain/keyring). Si el
+ * SO no ofrece keyring (típico en Linux sin gnome-keyring/kwallet), caemos a un
+ * fallback AES-256-GCM con una clave local guardada 0600 — así la sesión persiste en
+ * todas las máquinas. El blob lleva un byte de método al inicio para saber cómo
+ * descifrarlo. Todos los archivos se escriben 0600 (solo el usuario los lee).
  */
 
 const FILE_NAME = 'session.bin'
+const KEY_NAME = 'session.key'
 const sessionFile = (): string => join(app.getPath('userData'), FILE_NAME)
+const keyFile = (): string => join(app.getPath('userData'), KEY_NAME)
 
-let warned = false
-
-export function canPersist(): boolean {
-  const ok = safeStorage.isEncryptionAvailable()
-  if (!ok && !warned) {
-    warned = true
-    console.warn('[auth] safeStorage no disponible: la sesión no se guardará entre arranques.')
+/** Clave del fallback local: la lee de disco (0600) o la genera la primera vez. */
+async function localKey(): Promise<Buffer> {
+  try {
+    const existing = await readFile(keyFile())
+    if (existing.length === LOCAL_KEY_BYTES) return existing
+  } catch {
+    // todavía no existe: la generamos abajo.
   }
-  return ok
+  const key = randomBytes(LOCAL_KEY_BYTES)
+  await writeFile(keyFile(), key, { mode: 0o600 })
+  return key
 }
 
 export async function saveRefreshToken(token: string): Promise<boolean> {
-  if (!canPersist()) return false
-  await writeFile(sessionFile(), safeStorage.encryptString(token), { mode: 0o600 })
-  return true
+  try {
+    const blob = safeStorage.isEncryptionAvailable()
+      ? frame(TAG_SAFE_STORAGE, safeStorage.encryptString(token))
+      : frame(TAG_LOCAL_AES, localEncrypt(token, await localKey()))
+    await writeFile(sessionFile(), blob, { mode: 0o600 })
+    return true
+  } catch (reason) {
+    console.warn('[auth] no se pudo guardar la sesión:', reason instanceof Error ? reason.message : reason)
+    return false
+  }
 }
 
 export async function loadRefreshToken(): Promise<string | null> {
-  if (!canPersist()) return null
   try {
-    const encrypted = await readFile(sessionFile())
-    const token = safeStorage.decryptString(encrypted)
-    return token.length > 0 ? token : null
+    const { tag, payload } = unframe(await readFile(sessionFile()))
+
+    if (tag === TAG_SAFE_STORAGE) {
+      if (!safeStorage.isEncryptionAvailable()) return null
+      const token = safeStorage.decryptString(payload)
+      return token.length > 0 ? token : null
+    }
+    if (tag === TAG_LOCAL_AES) {
+      const token = localDecrypt(payload, await localKey())
+      return token.length > 0 ? token : null
+    }
+    return null // formato desconocido
   } catch {
-    // No hay sesión guardada, o el keychain cambió y ya no se puede descifrar.
+    // No hay sesión guardada, o ya no se puede descifrar (keyring cambió, clave perdida).
     return null
   }
 }
