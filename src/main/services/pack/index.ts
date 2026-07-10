@@ -14,6 +14,10 @@ export function instanceDir(): string {
   return join(app.getPath('userData'), 'instance')
 }
 
+/** Raíz del JRE gestionado (hermano de la instancia): userData/runtime. */
+export function runtimeDir(): string {
+  return join(app.getPath('userData'), 'runtime')
+}
 
 
 let inFlight: Promise<SyncResult> | null = null
