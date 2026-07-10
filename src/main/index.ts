@@ -6,6 +6,8 @@ import { buildCsp, isAppUrl } from './services/csp'
 import { cancelSync, runSync } from './services/pack'
 import { getConfig, setConfig } from './services/config'
 import { cancelPlay, runGamePlay } from './services/play-runner'
+import { wireUpdater } from './services/updater'
+import { autoUpdater } from 'electron-updater'
 import type { LauncherConfig } from '../shared/config'
 
 /**
@@ -17,6 +19,8 @@ import type { LauncherConfig } from '../shared/config'
 
 const WIDTH = 1280
 const HEIGHT = 720
+
+let mainWindow: BrowserWindow | null = null
 
 function applyCsp(): void {
   const csp = buildCsp(is.dev)
@@ -51,7 +55,11 @@ function createWindow(): void {
     }
   })
 
+  mainWindow = win
   win.on('ready-to-show', () => win.show())
+  win.on('closed', () => {
+    if (mainWindow === win) mainWindow = null
+  })
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     win.loadURL(process.env['ELECTRON_RENDERER_URL'])
@@ -99,7 +107,13 @@ app.whenReady().then(() => {
     return setConfig(safe)
   })
 
+  // M4 — auto-updater. check/download/install; el status vuelve por 'updater:status'.
+  ipcMain.handle('updater:check', () => (app.isPackaged ? autoUpdater.checkForUpdates() : null))
+  ipcMain.handle('updater:download', () => autoUpdater.downloadUpdate())
+  ipcMain.handle('updater:install', () => autoUpdater.quitAndInstall())
+
   createWindow()
+  setupUpdater()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
@@ -110,7 +124,18 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
 
-/* ------------------------------------------------------------------ *
- *  STUB M4 (sin implementar).                                         *
- *  M4 updater: autoUpdater.checkForUpdatesAndNotify()                 *
- * ------------------------------------------------------------------ */
+/* ------------------------------ M4 updater ------------------------------ *
+ * Auto-update desde GitHub Releases (repo público). autoDownload OFF: se
+ * pregunta antes de bajar. Solo activo en producción (empaquetado): el
+ * autoUpdater tira si corre en dev. Nunca bloquea el jugar.
+ * ------------------------------------------------------------------------ */
+function setupUpdater(): void {
+  if (!app.isPackaged) return
+  autoUpdater.autoDownload = false
+  autoUpdater.autoInstallOnAppQuit = true
+  wireUpdater(autoUpdater, (status) => {
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('updater:status', status)
+  })
+  // Chequeo al arrancar, no bloqueante; los errores los maneja wireUpdater.
+  setTimeout(() => void autoUpdater.checkForUpdates()?.catch(() => undefined), 3000)
+}
