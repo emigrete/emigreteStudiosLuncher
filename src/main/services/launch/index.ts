@@ -4,13 +4,15 @@ import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { Client } from 'minecraft-launcher-core'
 import type { PlayResult, PlayState } from '../../../shared/play'
-import { instanceDir } from '../pack'
+import { instanceDir, runtimeDir } from '../pack'
 import { getConfig, resolvedManifestUrl } from '../config'
 import { fetchManifest } from '../pack/manifest'
 import { createSafeFetch, policyFromEnv } from '../pack/net'
 import { downloadFile, type FetchLike } from '../pack/downloader'
 import { mclcAuthorization } from '../auth'
-import { detectJava, javaCandidates } from './java'
+import { detectJava, execJavaVersion, javaCandidates, MIN_JAVA } from './java'
+import { ensureManagedJava } from './java-runtime'
+import { realInstallJavaDeps } from './java-runtime-real'
 import {
   installNeoforge,
   neoforgeJvmArgs,
@@ -42,9 +44,20 @@ export async function runLaunch(emit: Emit, signal: AbortSignal): Promise<PlayRe
 
     // --- Java ---
     emit({ phase: 'preparing' })
-    const java = await detectJava(javaCandidates(process.env, process.platform))
+    const requiredMajor = manifest.java?.major ?? MIN_JAVA
+    let java = await detectJava(javaCandidates(process.env, process.platform), execJavaVersion, requiredMajor)
     if (!java) {
-      return fail('Necesitás Java 21 para jugar. Instalalo (Temurin/Adoptium) o definí PACK_JAVA_PATH.')
+      // No hay Java del sistema: bajamos un JRE gestionado (una sola vez).
+      emit({ phase: 'downloading-java', percent: 0 })
+      const javaPath = await ensureManagedJava(
+        requiredMajor,
+        runtimeDir(),
+        process.platform,
+        (percent) => emit({ phase: 'downloading-java', percent }),
+        realInstallJavaDeps,
+        signal
+      )
+      java = { path: javaPath, major: requiredMajor }
     }
 
     // --- Sesión ---
