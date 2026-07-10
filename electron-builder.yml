@@ -19,8 +19,7 @@ linux:
   category: Game
 
 # Feed de auto-update (M4b): GitHub Releases, repo público (sin token en el cliente).
-# owner/repo se completan al crear el repo (ver plan M4b, Task 10).
 publish:
   provider: github
-  owner: REEMPLAZAR_OWNER
-  repo: REEMPLAZAR_REPO
+  owner: emigrete
+  repo: emigreteStudiosLuncher
