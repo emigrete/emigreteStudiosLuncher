@@ -185,6 +185,36 @@ export const IconLogout = (p: P): JSX.Element =>
     p
   )
 
+export const IconFilm = (p: P): JSX.Element =>
+  svg(
+    22,
+    <g fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
+      <rect x="3" y="5" width="18" height="14" rx="1" />
+      <path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none" />
+    </g>,
+    p
+  )
+
+export const IconSpeaker = (p: P): JSX.Element =>
+  svg(
+    18,
+    <g fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 9v6h3l5 4V5L7 9H4z" fill="currentColor" stroke="none" />
+      <path d="M16 8.5a5 5 0 0 1 0 7M18.7 6a8 8 0 0 1 0 12" />
+    </g>,
+    p
+  )
+
+export const IconSpeakerMute = (p: P): JSX.Element =>
+  svg(
+    18,
+    <g fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 9v6h3l5 4V5L7 9H4z" fill="currentColor" stroke="none" />
+      <path d="M16.5 9.5l5 5M21.5 9.5l-5 5" />
+    </g>,
+    p
+  )
+
 export const SOCIAL_ICONS: Record<string, (p: P) => JSX.Element> = {
   discord: IconDiscord,
   youtube: IconYouTube,

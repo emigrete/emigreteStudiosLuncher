@@ -3,11 +3,12 @@ import logo from '../assets/emigrete_logo.png'
 import banner from '../assets/banner_teammafia.png'
 import titleArt from '../assets/title_netherite.png'
 import { FAR_LANDS_ACTS, SOCIALS } from '../data/content'
-import { ACT_ICONS, SOCIAL_ICONS, IconCube, IconSliders, IconDoor } from './icons'
+import { ACT_ICONS, SOCIAL_ICONS, IconCube, IconSliders, IconDoor, IconFilm } from './icons'
 import PlayButton from './PlayButton'
 import ProfilePlaque from './ProfilePlaque'
 import PlayStatus from './PlayStatus'
 import SettingsModal from './SettingsModal'
+import TrailerModal from './TrailerModal'
 import type { ModalState } from './Modal'
 import type { UseAuth } from '../hooks/useAuth'
 import { usePlay } from '../hooks/usePlay'
@@ -25,6 +26,7 @@ interface MenuProps {
 export default function Menu({ onOpenModal, auth }: MenuProps): JSX.Element {
   const play = usePlay()
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [trailerOpen, setTrailerOpen] = useState(false)
   const openSettings = (): void => setSettingsOpen(true)
 
   return (
@@ -58,6 +60,12 @@ export default function Menu({ onOpenModal, auth }: MenuProps): JSX.Element {
         )}
         {auth.profile?.demo && <p className="actions__warn">Cuenta demo: no podés jugar el modpack.</p>}
         <PlayStatus play={play} />
+        <button className="btn btn--trailer" onClick={() => setTrailerOpen(true)}>
+          <span className="btn__ico">
+            <IconFilm />
+          </span>
+          <span className="btn__label">VER TRÁILER</span>
+        </button>
         <button className="btn" onClick={() => onOpenModal(MODS_MODAL)}>
           <span className="btn__ico">
             <IconCube />
@@ -130,6 +138,7 @@ export default function Menu({ onOpenModal, auth }: MenuProps): JSX.Element {
       </footer>
 
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <TrailerModal open={trailerOpen} onClose={() => setTrailerOpen(false)} />
     </main>
   )
 }
