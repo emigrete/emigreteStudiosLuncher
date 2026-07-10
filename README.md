@@ -217,10 +217,44 @@ dev (para el HMR de Vite). Se inyecta **solo en las URLs de la app** (`file://` 
 de Vite en dev): meterla en respuestas de terceros rompe el login de Microsoft — `default-src
 'self'` le bloquea los scripts y la página queda en blanco.
 
+## Releases y auto-update (M4b)
+
+El launcher se auto-actualiza con `electron-updater` desde **GitHub Releases** del repo público
+`emigrete/emigreteStudiosLuncher` (feed configurado en `electron-builder.yml`). El repo es público,
+así que el cliente baja las updates **sin token**. El chequeo corre al arrancar (solo en el build
+empaquetado, no en dev) y **pregunta antes de bajar** (`autoDownload = false`): aparece un pill en
+la HUD → *Descargar* → progreso → *Reiniciar para actualizar*.
+
+**Cortar un release:**
+
+```bash
+# 1. Subí la versión en package.json (ej. 0.1.0 -> 0.1.1)
+npm version patch --no-git-tag-version
+
+# 2. Build + publish (Linux AppImage). Crea un release DRAFT con el instalador + latest-linux.yml
+GH_TOKEN="$(gh auth token)" npx electron-builder --linux AppImage --publish always
+
+# 3. Publicá el draft (electron-updater solo ve releases publicados, no drafts)
+gh release edit "v$(node -p "require('./package.json').version")" --draft=false --latest
+```
+
+Los clientes con una versión previa instalada detectan el nuevo release y ofrecen actualizar.
+El primer release fija la baseline (el auto-update solo funciona *desde* una versión ya instalada).
+
+**Notas:**
+- **Windows (NSIS)** necesita `wine` para empaquetar desde Linux (o un runner Windows / CI). El
+  target está configurado; agregá `--win nsis` al comando cuando tengas wine.
+- **macOS** queda afuera (sin firma de Apple el auto-update no funciona).
+- **Sin firma de código:** en Windows aparece el aviso de SmartScreen "editor desconocido" al
+  instalar; el auto-update igual funciona. Firmar antes de una distribución amplia.
+- **AppImage** se auto-actualiza en su lugar solo si se corre como AppImage real (con `APPIMAGE`
+  seteado), no el binario desempaquetado.
+
 ## Roadmap
 
 - **M0** — shell visual: splash + menú sobre el hero real. ✅
 - **M1** — Auth Microsoft con `msmc`: login, sesión persistida, perfil real. ✅
 - **M2** — Sync del modpack: manifiesto, descarga verificada y progreso real. ✅
-- **M3 (actual)** — Lanzar Minecraft con NeoForge 1.21.1 (instala loader, detecta Java, MCLC). ✅
-- **M4** — Auto-updater del launcher (`electron-updater`) + descarga automática de Java.
+- **M3** — Lanzar Minecraft con NeoForge 1.21.1 (instala loader, detecta Java, MCLC). ✅
+- **M4 (actual)** — Auto-updater (`electron-updater`) + descarga automática de Java (`@xmcl`). ✅
+  M4a (auto-Java) verificado con descarga real; M4b (updater) publicando desde GitHub Releases.
