@@ -1,0 +1,22 @@
+# electron-builder — empaquetado base (Hito M0).
+appId: studios.emigrete.caballeronetherite
+productName: El Caballero de Netherite
+copyright: © Emigrete Studios
+
+directories:
+  buildResources: build # icon.png (logo Emigrete) se toma de acá
+  output: release
+
+files:
+  - out/**
+  - package.json
+  - "!**/*.map"
+
+win:
+  target: nsis
+linux:
+  target: AppImage
+  category: Game
+mac:
+  target: dmg
+  category: public.app-category.games

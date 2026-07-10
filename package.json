@@ -1,0 +1,45 @@
+{
+  "name": "emigrete-launcher",
+  "productName": "El Caballero de Netherite",
+  "version": "0.1.0",
+  "description": "Launcher de escritorio del modpack 'El Caballero de Netherite' — Emigrete Studios. Hito M0: shell visual (splash + menú), sin auth ni descargas.",
+  "author": "Emigrete Studios",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "./out/main/index.js",
+  "scripts": {
+    "gen:assets": "node scripts/gen-placeholders.mjs",
+    "predev": "npm run gen:assets",
+    "dev": "electron-vite dev",
+    "prestart": "npm run gen:assets",
+    "start": "electron-vite build && electron-vite preview",
+    "build": "npm run gen:assets && electron-vite build",
+    "typecheck:node": "tsc -p tsconfig.node.json --noEmit",
+    "typecheck:web": "tsc -p tsconfig.web.json --noEmit",
+    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "dist": "npm run build && electron-builder",
+    "clean": "node -e \"require('fs').rmSync('out',{recursive:true,force:true})\"",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./test/helpers/register.mjs --test \"test/**/*.test.ts\"",
+    "pack:manifest": "node scripts/make-manifest.mjs"
+  },
+  "devDependencies": {
+    "@electron-toolkit/preload": "^3.0.2",
+    "@electron-toolkit/utils": "^4.0.0",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.2.0",
+    "electron": "^43.1.0",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^5.0.0",
+    "typescript": "^7.0.2",
+    "vite": "^7.3.6"
+  },
+  "dependencies": {
+    "minecraft-launcher-core": "^3.18.2",
+    "msmc": "^5.0.5",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "zod": "^4.4.3"
+  }
+}

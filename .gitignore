@@ -1,0 +1,11 @@
+node_modules/
+out/
+release/
+dist/
+
+# Único asset generado (scripts/gen-placeholders.mjs). El resto del arte es real y va versionado.
+src/renderer/src/assets/stone.png
+
+*.log
+.DS_Store
+.env

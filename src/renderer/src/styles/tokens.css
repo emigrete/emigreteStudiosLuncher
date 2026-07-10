@@ -1,0 +1,44 @@
+/* ============================================================
+   Design tokens — El Caballero de Netherite (Emigrete Studios)
+   DOS paletas que NO se mezclan:
+     · LORE (cálida/épica)  -> corazón del menú
+     · EMIGRETE (fría/tech) -> SOLO splash y footer
+   ============================================================ */
+:root {
+  /* LORE */
+  --violeta: #9d4edd;
+  --violeta-osc: #7b2cbf;
+  --naranja: #e85d04;
+  --naranja-luz: #ff8a3d;
+  --rojo-accion: #c1121f;
+
+  /* EMIGRETE (uso restringido) */
+  --emigrete-cyan: #3fe0e0;
+  --emigrete-blanco: #ede7f6;
+
+  /* Base + texto */
+  --fondo: #0a0710;
+  --crema: #f2e8d6;
+  --crema-dim: rgba(242, 232, 214, 0.66);
+  --crema-faint: rgba(242, 232, 214, 0.4);
+
+  /* Metal / marco */
+  --bronce: #b5651d;
+  --bronce-luz: #e6a052;
+  --bronce-linea: rgba(230, 160, 82, 0.32);
+
+  /* Vidrio (paneles frosted) — legibles incluso sin backdrop-filter */
+  --glass-hi: rgba(26, 19, 30, 0.74);
+  --glass-lo: rgba(12, 9, 16, 0.8);
+
+  /* Tipografía — Monocraft (pixel estilo Minecraft, acentos completos) */
+  --font-display: "Monocraft", "Courier New", monospace;
+  --font-ui: "Monocraft", "Courier New", monospace;
+  --font-pixel: "Monocraft", "Courier New", monospace;
+
+  /* Motion */
+  --dur-fast: 130ms;
+  --dur: 260ms;
+  --dur-slow: 560ms;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}

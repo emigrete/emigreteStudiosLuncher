@@ -1,0 +1,10 @@
+/* Monocraft — fuente pixel estilo Minecraft con cobertura Latin completa
+   (acentos españoles). Licencia OFL. Auto-hospedada: Vite la empaqueta y
+   hashea, por eso alcanza con font-src 'self' en la CSP de producción. */
+@font-face {
+  font-family: "Monocraft";
+  src: url("../assets/fonts/monocraft.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
