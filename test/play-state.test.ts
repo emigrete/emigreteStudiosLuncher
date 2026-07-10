@@ -46,3 +46,10 @@ test('isPlayBusy: ocupado salvo idle y error', () => {
     assert.equal(isPlayBusy(state), true, phase)
   }
 })
+
+test('downloading-java: label muestra el porcentaje y cuenta como ocupado', () => {
+  const s = { phase: 'downloading-java', percent: 40 } as const
+  assert.equal(playLabel(s, true), 'JAVA 40%')
+  assert.equal(playPercent(s), 40)
+  assert.equal(isPlayBusy(s), true)
+})

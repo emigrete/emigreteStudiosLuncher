@@ -18,6 +18,7 @@ export type PlayState =
   | { phase: 'idle' }
   | { phase: 'syncing'; sync: SyncProgress }
   | { phase: 'preparing' } // detectando Java
+  | { phase: 'downloading-java'; percent: number } // bajando el JRE gestionado
   | { phase: 'installing-loader' }
   | { phase: 'launching'; loader?: LoaderProgress } // MCLC bajando Minecraft
   | { phase: 'running' } // ventana del juego abierta
@@ -36,6 +37,8 @@ export function playLabel(state: PlayState, authed: boolean): string {
       return phaseLabel(state.sync)
     case 'preparing':
       return 'PREPARANDO...'
+    case 'downloading-java':
+      return `JAVA ${Math.round(state.percent)}%`
     case 'installing-loader':
       return 'INSTALANDO NEOFORGE'
     case 'launching':
@@ -55,6 +58,8 @@ export function playPercent(state: PlayState): number | null {
   switch (state.phase) {
     case 'syncing':
       return syncPercent(state.sync)
+    case 'downloading-java':
+      return state.percent
     case 'launching':
       return state.loader ? loaderPercent(state.loader) : null
     case 'running':
