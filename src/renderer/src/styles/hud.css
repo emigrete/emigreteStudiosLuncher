@@ -961,33 +961,8 @@
     0 0 10px rgba(232, 93, 4, 0.4);
 }
 
-/* ---------------------- Toggle de música (chrome) --------------------- */
-.music-toggle {
-  position: fixed;
-  left: 16px;
-  bottom: 16px;
-  z-index: 60;
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  color: var(--crema);
-  background: linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
-  border: 3px solid #100c10;
-  border-radius: 2px;
-  box-shadow: inset 2px 2px 0 rgba(235, 215, 180, 0.2), inset -2px -2px 0 rgba(0, 0, 0, 0.55);
-  cursor: pointer;
-  transition: filter var(--dur-fast), color var(--dur-fast);
-}
-.music-toggle:hover {
-  filter: brightness(1.2);
-  color: var(--bronce-luz);
-}
-.music-toggle:focus-visible {
-  outline: 2px solid var(--emigrete-cyan);
-  outline-offset: 2px;
-}
-.music-toggle[aria-pressed='true'] {
+/* ------------------ Toggle de música (en los winctl) ------------------ */
+.winctl__btn--music.is-muted {
   color: var(--crema-faint);
 }
 

@@ -2,11 +2,11 @@ import { useEffect, useState, type JSX } from 'react'
 import HeroBackground from './components/HeroBackground'
 import TitleBar from './components/TitleBar'
 import UpdaterPill from './components/UpdaterPill'
-import LauncherAudio from './components/LauncherAudio'
 import Menu from './components/Menu'
 import Splash from './components/Splash'
 import Modal, { type ModalState } from './components/Modal'
 import { useAuth } from './hooks/useAuth'
+import { MusicProvider } from './hooks/useMusic'
 
 // La barra de carga anima 2s; damos un beat extra antes del fade al menú.
 const SPLASH_MS = 2400
@@ -22,14 +22,13 @@ export default function App(): JSX.Element {
   }, [])
 
   return (
-    <>
+    <MusicProvider>
       <HeroBackground />
       <TitleBar />
       <UpdaterPill />
-      <LauncherAudio />
       <Menu onOpenModal={setModal} auth={auth} />
       <Modal state={modal} onClose={() => setModal(null)} />
       <Splash gone={booted} />
-    </>
+    </MusicProvider>
   )
 }
