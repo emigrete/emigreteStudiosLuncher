@@ -1,6 +1,6 @@
 import { app, safeStorage } from 'electron'
 import { join } from 'path'
-import { readFile, writeFile, rm } from 'fs/promises'
+import { readFile, writeFile, rm, open, chmod } from 'fs/promises'
 import { randomBytes } from 'node:crypto'
 import {
   TAG_SAFE_STORAGE,
@@ -27,17 +27,37 @@ const KEY_NAME = 'session.key'
 const sessionFile = (): string => join(app.getPath('userData'), FILE_NAME)
 const keyFile = (): string => join(app.getPath('userData'), KEY_NAME)
 
-/** Clave del fallback local: la lee de disco (0600) o la genera la primera vez. */
+/**
+ * Clave del fallback local: la lee de disco (0600) o la genera la primera vez.
+ * Creación ATÓMICA (`wx`) para que dos guardados concurrentes no generen claves
+ * distintas (evita huérfanos → re-login intermitente). Si la clave está pero con
+ * tamaño inválido (corrupta / escritura parcial), la regeneramos limpio.
+ */
 async function localKey(): Promise<Buffer> {
   try {
     const existing = await readFile(keyFile())
     if (existing.length === LOCAL_KEY_BYTES) return existing
-  } catch {
-    // todavía no existe: la generamos abajo.
+    await rm(keyFile(), { force: true }) // tamaño inválido: no sirve para descifrar nada, la rehacemos
+  } catch (reason) {
+    if ((reason as NodeJS.ErrnoException).code !== 'ENOENT') throw reason
   }
+
   const key = randomBytes(LOCAL_KEY_BYTES)
-  await writeFile(keyFile(), key, { mode: 0o600 })
-  return key
+  try {
+    const handle = await open(keyFile(), 'wx', 0o600) // exclusivo: gana una sola creación
+    try {
+      await handle.write(key)
+    } finally {
+      await handle.close()
+    }
+    return key
+  } catch (reason) {
+    if ((reason as NodeJS.ErrnoException).code === 'EEXIST') {
+      const winner = await readFile(keyFile()) // otro proceso la creó primero: usamos la suya
+      if (winner.length === LOCAL_KEY_BYTES) return winner
+    }
+    throw reason
+  }
 }
 
 export async function saveRefreshToken(token: string): Promise<boolean> {
@@ -46,6 +66,7 @@ export async function saveRefreshToken(token: string): Promise<boolean> {
       ? frame(TAG_SAFE_STORAGE, safeStorage.encryptString(token))
       : frame(TAG_LOCAL_AES, localEncrypt(token, await localKey()))
     await writeFile(sessionFile(), blob, { mode: 0o600 })
+    await chmod(sessionFile(), 0o600) // el mode de writeFile se ignora si el archivo ya existía
     return true
   } catch (reason) {
     console.warn('[auth] no se pudo guardar la sesión:', reason instanceof Error ? reason.message : reason)
