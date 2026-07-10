@@ -3,6 +3,7 @@ import type { AuthResult, AuthState } from '../shared/types'
 import type { SyncProgress, SyncResult } from '../shared/pack'
 import type { LauncherConfig } from '../shared/config'
 import type { PlayResult, PlayState } from '../shared/play'
+import type { UpdaterStatus } from '../shared/updater'
 
 /** Puente IPC seguro renderer <-> main. Se expone como window.api. */
 const api = {
@@ -45,11 +46,19 @@ const api = {
       ipcRenderer.on('play:progress', listener)
       return () => ipcRenderer.removeListener('play:progress', listener)
     }
-  }
+  },
 
-  // --- Stubs M3+ (no implementados) ---
-  // launch:   () => ipcRenderer.invoke('game:launch'),
-  // onUpdaterStatus: (cb) => ipcRenderer.on('updater:status', (_e, s) => cb(s)),
+  // M4 — auto-updater.
+  updater: {
+    check: (): Promise<unknown> => ipcRenderer.invoke('updater:check'),
+    download: (): Promise<unknown> => ipcRenderer.invoke('updater:download'),
+    install: (): Promise<unknown> => ipcRenderer.invoke('updater:install'),
+    onStatus: (callback: (status: UpdaterStatus) => void): (() => void) => {
+      const listener = (_event: unknown, status: UpdaterStatus): void => callback(status)
+      ipcRenderer.on('updater:status', listener)
+      return () => ipcRenderer.removeListener('updater:status', listener)
+    }
+  }
 }
 
 if (process.contextIsolated) {
