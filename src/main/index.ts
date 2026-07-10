@@ -51,7 +51,8 @@ function createWindow(): void {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      autoplayPolicy: 'no-user-gesture-required' // permite la música de fondo del launcher
     }
   })
 
@@ -92,11 +93,20 @@ app.whenReady().then(() => {
   ipcMain.handle('pack:cancel', () => cancelSync())
 
   // M3 — jugar (sincroniza + lanza). El progreso vuelve por 'play:progress'.
-  ipcMain.handle('game:play', (event) =>
-    runGamePlay((state) => {
+  // Al abrir el juego (fase 'running') minimizamos el launcher para sacarlo del medio,
+  // y lo restauramos cuando el juego se cierra (runGamePlay resuelve).
+  ipcMain.handle('game:play', async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    const result = await runGamePlay((state) => {
       if (!event.sender.isDestroyed()) event.sender.send('play:progress', state)
+      if (state.phase === 'running') win?.minimize()
     })
-  )
+    if (win && !win.isDestroyed()) {
+      win.restore()
+      win.focus()
+    }
+    return result
+  })
   ipcMain.handle('game:cancel', () => cancelPlay())
 
   // Config persistida (URL del manifiesto, RAM).
