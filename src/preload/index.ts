@@ -10,7 +10,7 @@ const api = {
   minimize: (): void => ipcRenderer.send('win:minimize'),
   close: (): void => ipcRenderer.send('win:close'),
   quit: (): void => ipcRenderer.send('app:quit'),
-  version: '0.1.1',
+  version: '0.1.2',
 
   // M1 — autenticación Microsoft. Todo el trabajo ocurre en el main.
   auth: {

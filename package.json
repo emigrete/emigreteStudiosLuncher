@@ -1,7 +1,7 @@
 {
   "name": "emigrete-launcher",
   "productName": "El Caballero de Netherite",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Launcher de escritorio del modpack 'El Caballero de Netherite' — Emigrete Studios. Hito M0: shell visual (splash + menú), sin auth ni descargas.",
   "author": "Emigrete Studios",
   "license": "UNLICENSED",
